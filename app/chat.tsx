@@ -108,28 +108,28 @@ export default function ChatScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-[#F4F7FC]">
       <StatusBar style="dark" />
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-[#f0f8ff] border-b border-[#e0e0e0]">
+      <View className="flex-row items-center justify-between px-4 py-3 bg-[#F4F7FC] border-b border-[#E1E8F2]">
         <TouchableOpacity onPress={() => router.back()} className="p-2">
-          <ArrowLeft size={24} color="#000080" />
+          <ArrowLeft size={24} color="#102B50" />
         </TouchableOpacity>
 
         <View className="flex-row items-center">
           <Image
             source={avatar}
             style={{ width: 32, height: 32 }}
-            className="rounded-full bg-[#ffeb3b]"
+            className="rounded-full bg-[#FFD45C]"
           />
-          <Text className="ml-2 text-lg font-bold text-[#000080]">
+          <Text className="ml-2 text-lg font-bold text-[#102B50]">
             Chat Practice
           </Text>
         </View>
 
         <TouchableOpacity className="p-2">
-          <Award size={24} color="#000080" />
+          <Award size={24} color="#102B50" />
         </TouchableOpacity>
       </View>    
 
@@ -146,17 +146,17 @@ export default function ChatScreen() {
             }`}
           >
             <View
-              className={`rounded-2xl p-3 ${
+              className={`rounded-3xl p-4 ${
                 item.sender === "user"
-                  ? "bg-[#000080]"
-                  : "bg-[#add8e6]"
+                  ? "bg-[#102B50]"
+                  : "bg-[#E7EFFD]"
               }`}
             >
               <Text
                 className={`${
                   item.sender === "user"
                     ? "text-white"
-                    : "text-[#000080]"
+                    : "text-[#102B50]"
                 }`}
               >
                 {item.text}
@@ -168,7 +168,7 @@ export default function ChatScreen() {
                 <Image
                   source={avatar}
                   style={{ width: 16, height: 16 }}
-                  className="rounded-full bg-[#ffeb3b]"
+                  className="rounded-full bg-[#FFD45C]"
                 />
                 <Text className="text-xs text-gray-500 ml-1">LitSpark</Text>
               </View>
@@ -189,7 +189,7 @@ export default function ChatScreen() {
       {/* Input */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="border-t border-[#e0e0e0] bg-white"
+        className="border-t border-[#E1E8F2] bg-white"
       >
         <View className="flex-row items-center px-4 py-2">
           <TextInput
@@ -197,12 +197,12 @@ export default function ChatScreen() {
             onChangeText={setInputText}
             placeholder="Type your message..."
             multiline
-            className="flex-1 border border-[#add8e6] rounded-full px-4 py-2 mr-2 bg-[#f0f8ff]"
+            className="flex-1 border border-[#E7EFFD] rounded-full px-4 py-2 mr-2 bg-[#F4F7FC]"
           />
           <TouchableOpacity
             onPress={handleSend}
             disabled={!inputText.trim()}
-            className="bg-[#000080] p-3 rounded-full"
+            className="bg-[#102B50] p-3 rounded-full"
           >
             <Send size={20} color="white" />
           </TouchableOpacity>

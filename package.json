@@ -5,12 +5,13 @@
   "scripts": {
     "eas-build-pre-install": "node ./eas-build-pre-install.js",
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit",
+    "setup": "node scripts/setup.cjs"
   },
   "jest": {
     "preset": "jest-expo"

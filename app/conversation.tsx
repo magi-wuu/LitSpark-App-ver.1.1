@@ -158,8 +158,8 @@ export default function ConversationScreen() {
       if (!response.ok) {
         const text = await response.text();
         throw new Error(text);
-      } 
-      
+      }
+
       const data = await response.json();
 
       const transcribedText = data.text;
@@ -349,7 +349,7 @@ export default function ConversationScreen() {
   const levelProgress = getLevelProgress();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f0f8ff' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F4F7FC' }}>
       <StatusBar style="dark" />
 
       {/* Header */}
@@ -366,17 +366,17 @@ export default function ConversationScreen() {
             shadowRadius: 2,
           }}
         >
-          <ArrowLeft size={24} color="#000080" />
+          <ArrowLeft size={24} color="#102B50" />
         </TouchableOpacity>
 
         <View style={{ flex: 1, marginHorizontal: 16 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#000080', textAlign: 'center' }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#102B50', textAlign: 'center' }}>
             Practice Speaking
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 4 }}>
             <Text style={{ fontSize: 12, color: '#555', marginRight: 8 }}>Level {levelProgress.currentLevel}</Text>
             <View style={{ flex: 1, height: 8, backgroundColor: '#e2e8f0', borderRadius: 4, maxWidth: 100 }}>
-              <View style={{ width: `${levelProgress.progress}%`, height: 8, backgroundColor: '#FFD700', borderRadius: 4 }} />
+              <View style={{ width: `${levelProgress.progress}%`, height: 8, backgroundColor: '#FFD45C', borderRadius: 4 }} />
             </View>
             <Text style={{ fontSize: 10, color: '#777', marginLeft: 8 }}>{levelProgress.progress}%</Text>
           </View>
@@ -397,10 +397,10 @@ export default function ConversationScreen() {
       {/* AI Avatar */}
       <View style={{ alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
         <View style={{
-          width: 100,
-          height: 100,
+          width: 132,
+          height: 132,
           borderRadius: 64,
-          backgroundColor: '#000080',
+          backgroundColor: '#E7EFFD',
           alignItems: 'center',
           justifyContent: 'center',
           shadowColor: '#000',
@@ -411,7 +411,7 @@ export default function ConversationScreen() {
         }}>
           <Image
             source={avatar}
-            style={{ width: 95, height: 95 }}
+            style={{ width: 124, height: 124 }}
             contentFit="contain"
           />
         </View>
@@ -436,12 +436,12 @@ export default function ConversationScreen() {
           style={{
             flex: 1,
             paddingVertical: 8,
-            backgroundColor: conversationMode === 'practice' ? '#000080' : '#e2e8f0',
+            backgroundColor: conversationMode === 'practice' ? '#102B50' : '#e2e8f0',
             borderRadius: 12,
             alignItems: 'center'
           }}
         >
-          <Text style={{ color: conversationMode === 'practice' ? 'white' : '#000080', fontWeight: '600' }}>
+          <Text style={{ color: conversationMode === 'practice' ? 'white' : '#102B50', fontWeight: '600' }}>
             Practice English
           </Text>
         </TouchableOpacity>
@@ -451,12 +451,12 @@ export default function ConversationScreen() {
           style={{
             flex: 1,
             paddingVertical: 8,
-            backgroundColor: conversationMode === 'chat' ? '#000080' : '#e2e8f0',
+            backgroundColor: conversationMode === 'chat' ? '#102B50' : '#e2e8f0',
             borderRadius: 12,
             alignItems: 'center'
           }}
         >
-          <Text style={{ color: conversationMode === 'chat' ? 'white' : '#000080', fontWeight: '600' }}>
+          <Text style={{ color: conversationMode === 'chat' ? 'white' : '#102B50', fontWeight: '600' }}>
             Chat Normally
           </Text>
         </TouchableOpacity>
@@ -481,9 +481,9 @@ export default function ConversationScreen() {
             <View style={{
               padding: 12,
               borderRadius: 16,
-              backgroundColor: message.isUser ? '#FFD700' : '#ADD8E6'
+              backgroundColor: message.isUser ? '#FFD45C' : '#E7EFFD'
             }}>
-              <Text style={{ color: '#000080' }}>{message.text}</Text>
+              <Text style={{ color: '#102B50' }}>{message.text}</Text>
             </View>
             <Text style={{ fontSize: 10, color: '#555', marginTop: 4 }}>
               {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -507,7 +507,7 @@ export default function ConversationScreen() {
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.05,
             shadowRadius: 2,
-            backgroundColor: isRecording ? '#ef4444' : isTranscribing ? '#9ca3af' : '#000080'
+            backgroundColor: isRecording ? '#ef4444' : isTranscribing ? '#9ca3af' : '#102B50'
           }}
         >
           {isRecording ? <Square size={32} color="white" /> : <Mic size={32} color="white" />}
@@ -519,13 +519,13 @@ export default function ConversationScreen() {
       <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16, gap: 16 }}>
         <TouchableOpacity
           onPress={playUserRecording}
-          style={{ 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            paddingHorizontal: 16, 
-            paddingVertical: 8, 
-            backgroundColor: isUserRecordingPlaying ? '#ef4444' : '#000080', 
-            borderRadius: 9999 
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            backgroundColor: isUserRecordingPlaying ? '#ef4444' : '#102B50',
+            borderRadius: 9999
           }}
         >
           {isUserRecordingPlaying ? (
@@ -547,13 +547,13 @@ export default function ConversationScreen() {
             setIsSpeaking(false);
             setIsUserRecordingPlaying(false); // Add this line
           }}
-          style={{ 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            paddingHorizontal: 16, 
-            paddingVertical: 8, 
-            backgroundColor: isSpeaking ? '#ef4444' : '#9ca3af', 
-            borderRadius: 9999 
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            backgroundColor: isSpeaking ? '#ef4444' : '#9ca3af',
+            borderRadius: 9999
           }}
         >
           <Text style={{ color: 'white', marginLeft: 8 }}>

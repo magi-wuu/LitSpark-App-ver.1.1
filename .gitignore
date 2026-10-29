@@ -40,3 +40,17 @@ app-example
 
 **/tempobook/dynamic/
 **/tempobook/storyboards/
+
+# Credentials and local development files
+.env.*
+!.env.example
+*.keystore
+!android/app/debug.keystore
+coverage/
+ios/Pods/
+ios/build/
+android/.gradle/
+android/build/
+android/app/build/
+*.xcuserstate
+xcuserdata/

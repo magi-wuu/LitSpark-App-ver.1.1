@@ -1,44 +1,14 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { ArrowUpRight, Clock } from 'lucide-react-native';
 import { Module } from '../data/modules';
 import { useRouter } from 'expo-router';
-
-interface ModuleCardProps {
-  module: Module;
-}
-
-export default function ModuleCard({ module }: ModuleCardProps) {
+import { colors as c } from '../../constants/theme';
+export default function ModuleCard({ module }: { module: Module }) {
   const router = useRouter();
-
-  return (
-    <Pressable
-      onPress={() => router.push(`/esl/modules/${module.id}` as any)}
-      className="bg-white rounded-3xl p-2 mb-5 active:scale-[0.97]"
-      style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
-      }}
-    >
-      <View className="flex items-center">
-        <Text className="text-6xl p-7 mb-1">{module.icon}</Text>
-        <Text className="text-2xl font-semibold text-charcoal mb-2 text-center">
-          {module.title}
-        </Text>
-        <Text className="text-base text-gray-medium text-center mb-4">
-          {module.description}
-        </Text>
-        <View className="flex-row items-center" style={{ gap: 16 }}>
-          <Text className="text-sm font-mono text-gray-medium">
-            {module.questions.length} questions
-          </Text>
-          <Text className="text-sm font-mono text-gray-medium">•</Text>
-          <Text className="text-sm font-mono text-gray-medium">
-            {module.estimatedTime}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  );
+  return <Pressable accessibilityRole="button" onPress={() => router.push(`/esl/modules/${module.id}` as any)} style={s.card}>
+    <View style={s.top}><View style={s.icon}><Text style={{ fontSize: 28 }}>{module.icon}</Text></View><ArrowUpRight size={22} color={c.blue} /></View>
+    <Text style={s.title}>{module.title}</Text><Text style={s.body}>{module.description}</Text>
+    <View style={s.meta}><Clock size={14} color={c.muted} /><Text style={s.caption}>{module.estimatedTime}</Text><Text style={s.caption}>• {module.questions.length} questions</Text></View>
+  </Pressable>;
 }
+const s = StyleSheet.create({ card: { backgroundColor: c.surface, borderRadius: 26, padding: 22, marginBottom: 14, borderWidth: 1, borderColor: c.border }, top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }, icon: { backgroundColor: c.paleBlue, padding: 12, borderRadius: 18 }, title: { color: c.navy, fontSize: 21, fontWeight: '700' }, body: { color: c.muted, fontSize: 14, lineHeight: 22, marginTop: 8 }, meta: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 18 }, caption: { color: c.muted, fontSize: 12 } });

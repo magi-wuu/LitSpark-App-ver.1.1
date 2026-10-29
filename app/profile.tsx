@@ -151,7 +151,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#f0f8ff]">
+    <SafeAreaView className="flex-1 bg-[#F4F7FC]">
       <StatusBar style="dark" />
 
       {/* Header */}
@@ -160,9 +160,9 @@ export default function ProfileScreen() {
           onPress={handleBackPress}
           className="p-2 rounded-full bg-gray-100"
         >
-          <ArrowLeft size={24} color="#000080" />
+          <ArrowLeft size={24} color="#102B50" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold text-[#000080]">
+        <Text className="text-lg font-bold text-[#102B50]">
           My Profile
         </Text>
         <TouchableOpacity
@@ -170,9 +170,9 @@ export default function ProfileScreen() {
           className="p-2 rounded-full bg-gray-100"
         >
           {isEditing ? (
-            <Settings size={24} color="#000080" />
+            <Settings size={24} color="#102B50" />
           ) : (
-            <Edit3 size={24} color="#000080" />
+            <Edit3 size={24} color="#102B50" />
           )}
         </TouchableOpacity>
       </View>
@@ -181,7 +181,7 @@ export default function ProfileScreen() {
         {/* Profile Header */}
         <View className="bg-white mx-4 mt-4 rounded-3xl p-6 shadow-sm">
           <View className="items-center">
-            <Text className="text-3xl font-bold text-[#000080] mb-1">
+            <Text className="text-3xl font-bold text-[#102B50] mb-1">
               Hi there!
             </Text>
             {/* Name and Email */}
@@ -191,7 +191,7 @@ export default function ProfileScreen() {
                   <TextInput
                     value={profile.name}
                     onChangeText={(text) => updateProfile({ name: text })}
-                    className="text-xl font-bold text-[#000080] text-center border-b border-gray-300 pb-1 mb-3"
+                    className="text-xl font-bold text-[#102B50] text-center border-b border-gray-300 pb-1 mb-3"
                     placeholder="Your name"
                   />
                   <TextInput
@@ -204,14 +204,14 @@ export default function ProfileScreen() {
                   />
                   <TouchableOpacity
                     onPress={handleSaveProfile}
-                    className="bg-[#000080] rounded-full px-6 py-2 mt-4 self-center"
+                    className="bg-[#102B50] rounded-full px-6 py-2 mt-4 self-center"
                   >
                     <Text className="text-white font-bold">Save Changes</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
                 <View className="items-center">
-                  <Text className="text-xl font-bold text-[#000080] mb-1">
+                  <Text className="text-xl font-bold text-[#102B50] mb-1">
                     {profile.name}
                   </Text>
                   <Text className="text-gray-600 text-center italic">
@@ -231,34 +231,34 @@ export default function ProfileScreen() {
 
         {/* Stats Overview */}
         <View className="bg-white mx-4 mt-4 rounded-3xl p-6 shadow-sm">
-          <Text className="text-lg font-bold text-[#000080] mb-4">Learning Stats</Text>
+          <Text className="text-lg font-bold text-[#102B50] mb-4">Learning Stats</Text>
           
           <View className="flex-row justify-between mb-4">
             <View className="items-center flex-1">
-              <View className="bg-[#f0f8ff] rounded-full p-3 mb-2">
-                <Trophy size={24} color="#000080" />
+              <View className="bg-[#F4F7FC] rounded-full p-3 mb-2">
+                <Trophy size={24} color="#102B50" />
               </View>
-              <Text className="text-2xl font-bold text-[#000080]">
+              <Text className="text-2xl font-bold text-[#102B50]">
                 {levelProgress.currentLevel}
               </Text>
               <Text className="text-gray-600 text-sm">Current Level</Text>
             </View>
             
             <View className="items-center flex-1">
-              <View className="bg-[#f0f8ff] rounded-full p-3 mb-2">
-                <Clock size={24} color="#FFD700" />
+              <View className="bg-[#F4F7FC] rounded-full p-3 mb-2">
+                <Clock size={24} color="#FFD45C" />
               </View>
-              <Text className="text-2xl font-bold text-[#000080]">
+              <Text className="text-2xl font-bold text-[#102B50]">
                 {formatTime(progress.totalMinutesSpoken)}
               </Text>
               <Text className="text-gray-600 text-sm">Time Spoken</Text>
             </View>
             
             <View className="items-center flex-1">
-              <View className="bg-[#f0f8ff] rounded-full p-3 mb-2">
+              <View className="bg-[#F4F7FC] rounded-full p-3 mb-2">
                 <Star size={24} color="#4dabf7" />
               </View>
-              <Text className="text-2xl font-bold text-[#000080]">
+              <Text className="text-2xl font-bold text-[#102B50]">
                 {progress.averageScore}%
               </Text>
               <Text className="text-gray-600 text-sm">Avg Score</Text>
@@ -266,9 +266,9 @@ export default function ProfileScreen() {
           </View>
 
           {/* Level Progress */}
-          <View className="bg-[#f0f8ff] rounded-2xl p-4">
+          <View className="bg-[#F4F7FC] rounded-2xl p-4">
             <View className="flex-row justify-between items-center mb-2">
-              <Text className="font-bold text-[#000080]">
+              <Text className="font-bold text-[#102B50]">
                 Level {levelProgress.currentLevel} Progress
               </Text>
               <Text className="text-[#4dabf7] font-bold">
@@ -277,7 +277,7 @@ export default function ProfileScreen() {
             </View>
             <View className="bg-gray-200 h-3 rounded-full">
               <View
-                className="bg-[#FFD700] h-3 rounded-full"
+                className="bg-[#FFD45C] h-3 rounded-full"
                 style={{ width: `${levelProgress.progress}%` }}
               />
             </View>

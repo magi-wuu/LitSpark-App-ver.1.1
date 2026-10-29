@@ -1,0 +1,18 @@
+{
+  "nodeMajor": 22,
+  "dependencyManifest": "package.json",
+  "dependencyLockfile": "package-lock.json",
+  "installCommand": "npm ci",
+  "tools": [
+    { "name": "Node.js 22 (includes npm and npx)", "required": true, "download": "https://nodejs.org/en/download" },
+    { "name": "Git (for cloning and contributing)", "required": true, "download": "https://git-scm.com/downloads" },
+    { "name": "Code editor, such as Visual Studio Code", "required": false, "download": "https://code.visualstudio.com/" },
+    { "name": "Xcode and an iOS Simulator runtime", "required": "iPhone simulator only; macOS required", "download": "https://apps.apple.com/app/xcode/id497799835" },
+    { "name": "Expo client compatible with SDK 53, or a team-provided development build", "required": "native testing only", "download": "https://expo.dev/go" }
+  ],
+  "notes": [
+    "npm run setup installs all project packages from package.json using package-lock.json. Expo CLI is included; no global Expo installation is needed.",
+    "Install Node.js and Git first. Xcode and simulator runtimes must be installed separately through Apple; npm cannot install them.",
+    "An Expo account is useful for team builds and hosted Expo services, but is not required to start the local development server."
+  ]
+}

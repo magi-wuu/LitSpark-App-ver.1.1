@@ -13,15 +13,13 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0a1e3d]">
+    <SafeAreaView className="flex-1 bg-[#102B50]">
       <StatusBar style="light" />
       <View className="flex-1 items-center justify-between py-8 px-6">
-        {/* Cat mascot image */}
+        {/* LitSpark chick mascot */}
         <View className="flex-1 justify-center items-center w-full">
           <Image
-            source={{
-              uri: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=ffde59",
-            }}
+            source={require('../assets/images/LS.png')}
             className="w-72 h-72"
             style={{ width: 280, height: 280 }}
             resizeMode="contain"
@@ -36,17 +34,17 @@ export default function OnboardingScreen() {
 
           <TouchableOpacity
             onPress={handleStartLearning}
-            className="bg-[#ffde59] py-4 px-8 rounded-full flex-row items-center justify-center w-64"
+            className="bg-[#FFD45C] py-4 px-8 rounded-full flex-row items-center justify-center w-64"
             activeOpacity={0.8}
           >
-            <Text className="text-[#0a1e3d] text-xl font-bold mr-2">
+            <Text className="text-[#102B50] text-xl font-bold mr-2">
               Start Learning
             </Text>
-            <ArrowRight size={24} color="#0a1e3d" />
+            <ArrowRight size={24} color="#102B50" />
           </TouchableOpacity>
 
           <Text className="text-[#7fb3ff] text-center text-base">
-            Learn languages with our friendly cat companion!
+            Build your English confidence with your friendly practice buddy.
           </Text>
         </View>
       </View>

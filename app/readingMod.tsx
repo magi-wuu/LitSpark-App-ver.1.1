@@ -98,7 +98,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#f0f8ff]" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-[#F4F7FC]" edges={['top']}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 8 }}>
             <TouchableOpacity
             onPress={handleBackPress}
@@ -112,7 +112,7 @@ export default function HomeScreen() {
                 shadowRadius: 2,
             }}
             >
-            <ArrowLeft size={24} color="#000080" />
+            <ArrowLeft size={24} color="#102B50" />
             </TouchableOpacity>
 
             <View style={{ flex: 1, marginHorizontal: 16 }}>
@@ -126,7 +126,7 @@ export default function HomeScreen() {
       <View 
         className="bg-white px-6 py-6"
         style={{
-          shadowColor: '#A8D8EA',
+          shadowColor: '#367CE8',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
           shadowRadius: 4,
@@ -134,15 +134,15 @@ export default function HomeScreen() {
         }}
       >
         <View className="flex-row items-center mb-2">
-          <View className="bg-[#A8D8EA] w-10 h-10 rounded-full items-center justify-center mr-3">
+          <View className="bg-[#367CE8] w-10 h-10 rounded-full items-center justify-center mr-3">
             <BookOpen size={20} color="white" />
           </View>
-          <Text className="text-[#3A3A3A] text-3xl font-bold" style={{ fontFamily: 'System' }}>
-            Reading Library
+          <Text className="text-[#102B50] text-2xl font-bold" style={{ fontFamily: 'System' }}>
+            Find your next story
           </Text>
         </View>
-        <Text className="text-[#7A7A7A] text-base ml-[52px]">
-          Choose a story to practice your reading comprehension
+        <Text className="text-[#62738A] text-base ml-[52px]">
+          A little reading. A whole new world of words.
         </Text>
       </View>
 
