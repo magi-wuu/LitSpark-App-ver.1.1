@@ -31,7 +31,7 @@ Chatbot / conversation bot → our separate backend → external AI service
 | `constants/theme.ts` | Shared colors |
 | `assets/` | Logo, chick mascot, and fonts |
 
-Writing exercises and the connected learning pathway are still to be built. Reading quizzes already exist, but reading completion is not yet persistently saved.
+Reading completion and first-completion rewards are saved locally. The writing screen includes two starter prompts with saved drafts and a self-review checklist. A first guided reading → writing → review unit is available in the Learn tab, with saved progress and first-completion XP. A saved daily streak counter is available on Home and Learn. More units, daily goals, AI writing assessment, accounts, and cloud sync remain future work. See [streak rules and illustrated UI](docs/STREAKS_AND_ART.md). See [the journey implementation](docs/LEARNING_JOURNEY.md). See [storage behavior and limitations](docs/RELIABILITY.md).
 
 ## 1. Install requirements
 
@@ -87,6 +87,7 @@ The Mac requirement applies to the simulator; a physical iPhone is a different t
 
 ```sh
 npm run typecheck
+npm run test:reliability
 ```
 
 4. Open a pull request with a short explanation, validation notes, and screenshots for UI changes.

@@ -1,101 +1,26 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-// Define the shape of our user profile data
-interface UserProfile {
-  name: string;
-  joinDate: string;
-  bio: string;
-}
-
-// Define what functions our context will provide
+import React, { createContext, useContext } from 'react';
+import { useLocalStore } from '../hooks/useLocalStore';
+import { defaultProfile, decodeProfile, UserProfile } from '../lib/learningState';
 interface UserProfileContextType {
   profile: UserProfile;
+  loaded: boolean;
+  saving: boolean;
+  dirty: boolean;
+  error: 'load' | 'save' | null;
+  retry: () => Promise<void>;
+  flush: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => void;
   updateProfilePicture: (uri: string) => void;
 }
-
-// Default profile data for new users
-const defaultProfile: UserProfile = {
-  name: "New Learner",
-  joinDate: new Date().toISOString(),
-  bio: "Passionate language learner exploring new cultures through conversation!"
-};
-
-// Create the context - this will be undefined until we provide it
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
-
-// This is our provider component that wraps the app and provides profile data
 export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // State to hold the current profile data
-  const [profile, setProfile] = useState<UserProfile>(defaultProfile);
-
-  // Load saved profile data when the app starts
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  // Save profile data whenever it changes
-  useEffect(() => {
-    saveProfile();
-  }, [profile]);
-
-  // Function to load profile from device storage
-  const loadProfile = async () => {
-    try {
-      const savedProfile = await AsyncStorage.getItem('userProfile');
-      if (savedProfile) {
-        // Parse the JSON string back into an object and update state
-        setProfile(JSON.parse(savedProfile));
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-    }
-  };
-
-  // Function to save profile to device storage
-  const saveProfile = async () => {
-    try {
-      // Convert profile object to JSON string and save
-      await AsyncStorage.setItem('userProfile', JSON.stringify(profile));
-    } catch (error) {
-      console.error('Error saving profile:', error);
-    }
-  };
-
-  // Function to update profile with partial data (only the fields that changed)
-  const updateProfile = (updates: Partial<UserProfile>) => {
-    setProfile(prev => ({
-      ...prev,  // Keep all existing data
-      ...updates  // Override with new data
-    }));
-  };
-
-  // Specific function for updating just the profile picture
-  const updateProfilePicture = (uri: string) => {
-    setProfile(prev => ({
-      ...prev,
-      profilePicture: uri
-    }));
-  };
-
-  // Provide the profile data and functions to all child components
-  return (
-    <UserProfileContext.Provider value={{
-      profile,
-      updateProfile,
-      updateProfilePicture
-    }}>
-      {children}
-    </UserProfileContext.Provider>
-  );
+  const { data: profile, update, ...storage } = useLocalStore('userProfile', defaultProfile, decodeProfile);
+  const updateProfile = (updates: Partial<UserProfile>) => { void update(current => ({ ...current, ...updates })).catch(() => {}); };
+  const updateProfilePicture = (uri: string) => updateProfile({ profilePicture: uri });
+  return <UserProfileContext.Provider value={{ profile, ...storage, updateProfile, updateProfilePicture }}>{children}</UserProfileContext.Provider>;
 };
-
-// Custom hook to use the profile context - this makes it easy to access profile data
-export const useUserProfile = () => {
+export function useUserProfile() {
   const context = useContext(UserProfileContext);
-  if (context === undefined) {
-    throw new Error('useUserProfile must be used within a UserProfileProvider');
-  }
+  if (!context) throw new Error('useUserProfile must be used within a UserProfileProvider');
   return context;
-};
+}

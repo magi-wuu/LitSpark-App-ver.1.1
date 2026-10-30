@@ -1,83 +1,21 @@
-import { View, Text, Pressable, SafeAreaView } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { modules } from '../../../data/modules';
-import { ArrowLeft } from 'lucide-react-native';
-
+import { Action, StateScreen, ui } from '../../../../components/LearningUI';
+import { useProgress } from '../../../../contexts/ProgressContext';
 export default function ModuleIntroScreen() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const module = modules.find((m) => m.id === id);
-
-  if (!module) {
-    return (
-      <SafeAreaView className="flex-1 bg-cream">
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-xl text-charcoal">Module not found</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  return (
-    <SafeAreaView className="flex-1 bg-cream">
-      <View className="flex-1 px-5 py-6">
-        {/* Header */}
-        <View className="mb-8">
-          <Pressable
-            onPress={() => router.push('/esl')}
-            className="w-10 h-10 items-center justify-center active:scale-90"
-          >
-            <ArrowLeft size={24} color="#1E293B" />
-          </Pressable>
-        </View>
-
-        {/* Module Card */}
-        <View className="flex-1 justify-center">
-          <View
-            className="bg-white rounded-3xl p-8 items-center"
-            style={{
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.03,
-              shadowRadius: 12,
-              elevation: 3,
-            }}
-          >
-            <Text className="text-8xl p-7 mb-4">{module.icon}</Text>
-            <Text className="text-3xl font-bold text-charcoal mb-3 text-center">
-              {module.title}
-            </Text>
-            <Text className="text-base text-gray-medium text-center mb-6 leading-6">
-              {module.description}
-            </Text>
-            <View className="flex-row items-center mb-8" style={{ gap: 16 }}>
-              <Text className="text-sm font-mono text-gray-medium">
-                {module.questions.length} questions
-              </Text>
-              <Text className="text-sm font-mono text-gray-medium">•</Text>
-              <Text className="text-sm font-mono text-gray-medium">
-                {module.estimatedTime}
-              </Text>
-            </View>
-            <Pressable
-              onPress={() => router.push(`/esl/modules/${module.id}/practice`)}
-              className="bg-primary rounded-full py-4 px-12 active:scale-[0.97] w-full"
-              style={{
-                backgroundColor: '#3B82F6',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 2,
-              }}
-            >
-              <Text className="text-white text-center text-lg font-semibold">
-                Start Practice
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-    </SafeAreaView>
-  );
+  const { progress } = useProgress();
+  const module = modules.find(item => item.id === id);
+  if (!module) return <StateScreen title="Lesson not found" message="This lesson may have moved. Choose another topic to keep practicing." action="Back to lessons" onAction={() => router.replace('/esl')} />;
+  return <SafeAreaView style={ui.screen}><ScrollView contentContainerStyle={ui.content}>
+    <Action secondary label="Back to lessons" onPress={() => router.replace('/esl')} />
+    <View style={ui.card}><Text style={{ fontSize: 48 }}>{module.icon}</Text><Text accessibilityRole="header" style={ui.heading}>{module.title}</Text><Text style={ui.body}>{module.description}</Text>
+      <Text style={ui.muted}>{module.questions.length} questions · {module.estimatedTime}</Text>
+      <Text style={ui.body}>{progress.completions[`module:${module.id}`] ? 'You’ve completed this lesson. Practice again any time; replays don’t earn additional XP.' : 'Earn one XP per correct answer on your first completion. You can always replay for practice.'}</Text>
+      <Action label={progress.completions[`module:${module.id}`] ? 'Practice again' : 'Start practice'} onPress={() => router.push(`/esl/modules/${module.id}/practice`)} />
+    </View>
+  </ScrollView></SafeAreaView>;
 }

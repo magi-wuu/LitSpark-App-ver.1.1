@@ -1,34 +1,32 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { Question } from '../data/modules';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface QuestionCardProps {
   question: Question;
   onAnswer: (answer: string | number) => void;
+  disabled?: boolean;
 }
 
-export default function QuestionCard({ question, onAnswer }: QuestionCardProps) {
+export default function QuestionCard({ question, onAnswer, disabled = false }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string | number | null>(null);
-  const [arrangedWords, setArrangedWords] = useState<string[]>([]);
+  const [arrangedWords, setArrangedWords] = useState<number[]>([]);
+  const checked = useRef(false);
 
   const handleSelect = (answer: string | number) => {
-    setSelectedAnswer(answer);
+    if (!disabled && !checked.current) setSelectedAnswer(answer);
   };
 
-  const handleWordTap = (word: string, index: number) => {
-    if (arrangedWords.includes(word)) {
-      setArrangedWords(arrangedWords.filter((w) => w !== word));
-    } else {
-      setArrangedWords([...arrangedWords, word]);
-    }
+  const handleWordTap = (_word: string, index: number) => {
+    if (disabled || checked.current) return;
+    setArrangedWords(words => words.includes(index) ? words.filter(item => item !== index) : [...words, index]);
   };
-
   const handleCheck = () => {
-    if (question.type === 'sentence-building') {
-      onAnswer(arrangedWords.join(' '));
-    } else if (selectedAnswer !== null) {
-      onAnswer(selectedAnswer);
-    }
+    if (disabled || checked.current) return;
+    if (question.type === 'sentence-building' ? !arrangedWords.length : selectedAnswer === null) return;
+    checked.current = true;
+    if (question.type === 'sentence-building') onAnswer(arrangedWords.map(index => question.options[index]).join(' '));
+    else if (selectedAnswer !== null) onAnswer(selectedAnswer);
   };
 
   const isAnswerSelected = question.type === 'sentence-building' 
@@ -65,25 +63,25 @@ export default function QuestionCard({ question, onAnswer }: QuestionCardProps) 
               {arrangedWords.length > 0 && (
                 <View className="rounded-2xl p-4 mb-4" style ={{ backgroundColor: '#f0f8ff' }}>
                   <Text className="text-base text-charcoal">
-                    {arrangedWords.join(' ')}
+                    {arrangedWords.map(index => question.options[index]).join(' ')}
                   </Text>
                 </View>
               )}
               <View className="flex-row flex-wrap gap-2">
                 {question.options.map((word, index) => (
                   <Pressable
-                    style={{backgroundColor: '#f0f8ff' }}
+                    accessibilityRole="button" disabled={disabled} style={{backgroundColor: arrangedWords.includes(index) ? '#102B50' : '#E7EFFD', minHeight: 48 }}
                     key={index}
                     onPress={() => handleWordTap(word, index)}
                     className={`rounded-full px-5 py-3 ${
-                      arrangedWords.includes(word)
+                      arrangedWords.includes(index)
                         ? 'bg-primary'
                         : 'bg-cream'
                     }`}
                   >
                     <Text
                       className={`text-base ${
-                        arrangedWords.includes(word)
+                        arrangedWords.includes(index)
                           ? 'text-white'
                           : 'text-charcoal'
                       }`}
@@ -95,6 +93,8 @@ export default function QuestionCard({ question, onAnswer }: QuestionCardProps) 
               </View>
               {arrangedWords.length > 0 && (
                 <Pressable
+                  accessibilityRole="button"
+                  disabled={disabled}
                   onPress={() => setArrangedWords([])}
                   className="mt-4 self-center"
                 >
@@ -110,6 +110,9 @@ export default function QuestionCard({ question, onAnswer }: QuestionCardProps) 
               {question.options.map((option, index) => (
                 <Pressable
                   key={index}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: selectedAnswer === index, disabled }}
+                  disabled={disabled}
                   onPress={() => handleSelect(index)}
                   className={`rounded-full px-6 py-4 ${
                     selectedAnswer === index
@@ -117,7 +120,7 @@ export default function QuestionCard({ question, onAnswer }: QuestionCardProps) 
                       : 'bg-cream border-2 border-transparent'
                   }`}
                   style={{
-                    backgroundColor: selectedAnswer === index ? '#3B82F6' : '#f0f8ff',
+                    backgroundColor: selectedAnswer === index ? '#102B50' : '#E7EFFD',
                     shadowColor: '#000',
                     shadowOffset: { width: 0, height: 1 },
                     shadowOpacity: 0.05,
@@ -142,10 +145,12 @@ export default function QuestionCard({ question, onAnswer }: QuestionCardProps) 
       {isAnswerSelected && (
         <View className="px-5 pb-6 pt-4">
           <Pressable
+            accessibilityRole="button"
+            disabled={disabled}
             onPress={handleCheck}
             className="bg-primary rounded-full py-4 px-8 active:scale-[0.97]"
             style={{
-              backgroundColor: '#3B82F6',
+              backgroundColor: '#102B50',
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.1,

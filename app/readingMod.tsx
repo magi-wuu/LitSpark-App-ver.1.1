@@ -1,166 +1,36 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import { StoryCard } from "./components/StoryCard";
-import { StoryReader } from "./components/StoryReader";
-import { QuizView } from "./components/QuizView";
-import { CompletionModal } from "./components/CompletionModal";
-import { stories as initialStories } from "./data/stories";
-import { Story } from "./types/story";
-import { BookOpen } from "lucide-react-native";
-import { router, useRouter } from "expo-router";
-import { ArrowLeft } from "lucide-react-native";
-import { useProgress } from "../contexts/ProgressContext";
-
-
-type ViewMode = 'grid' | 'reader' | 'quiz';
-
-export default function HomeScreen() {
-  const {updateScore} = useProgress();
-  const [stories, setStories] = useState(initialStories);
-  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [showCompletion, setShowCompletion] = useState(false);
-  const [quizScore, setQuizScore] = useState({ score: 0, total: 0 });
-
-    const handleBackPress = () => {
-        router.back();
-      };
-
-  const handleStorySelect = (story: Story) => {
-    setSelectedStory(story);
-    setViewMode('reader');
+import { useRef, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { StoryCard } from './components/StoryCard';
+import { StoryReader } from './components/StoryReader';
+import { QuizView } from './components/QuizView';
+import { CompletionModal } from './components/CompletionModal';
+import { stories } from './data/stories';
+import { Story } from './types/story';
+import { useProgress } from '../contexts/ProgressContext';
+import { Action, ui } from '../components/LearningUI';
+export default function ReadingScreen() {
+  const router = useRouter();
+  const { progress, completeLesson, flush } = useProgress();
+  const [selected, setSelected] = useState<Story | null>(null);
+  const [mode, setMode] = useState<'grid' | 'reader' | 'quiz'>('grid');
+  const [result, setResult] = useState<{ score: number; total: number; replay: boolean } | null>(null);
+  const replay = useRef(false);
+  const close = () => { setMode('grid'); setSelected(null); setResult(null); };
+  const complete = async (score: number, total: number) => {
+    if (!selected) return;
+    await completeLesson(`reading:${selected.id}`, score, total, 10);
+    await flush();
+    setResult({ score, total, replay: replay.current });
   };
-
-  const handleCloseReader = () => {
-    setViewMode('grid');
-    setSelectedStory(null);
-  };
-
-  const handleStartQuiz = () => {
-    setViewMode('quiz');
-  };
-
-  const handleQuizComplete = (score: number, total: number) => {
-  if (!selectedStory) return;
-
-  setQuizScore({ score, total });
-  updateScore(Math.round((score / total) * 100));
-    // Update story progress
-    setStories(prev =>
-      prev.map(s =>
-        s.id === selectedStory.id
-          ? { ...s, progress: 100 }
-          : s
-      )
-    );
-
-    setShowCompletion(true);
-  };
-
-  const handleCloseCompletion = () => {
-    setShowCompletion(false);
-    handleCloseReader();
-  };
-
-  if (viewMode === 'reader' && selectedStory) {
-    return (
-
-      <View style={{ flex: 1 }}>
-        <StatusBar style="dark" />
-        <StoryReader
-          story={selectedStory}
-          onClose={handleCloseReader}
-          onComplete={handleStartQuiz}
-        />
-      </View>
-    );
-  }
-
-  if (viewMode === 'quiz' && selectedStory) {
-    return (
-      <View style={{ flex: 1 }}>
-        <StatusBar style="dark" />
-        <QuizView
-          story={selectedStory}
-          onClose={handleCloseReader}
-          onComplete={handleQuizComplete}
-        />
-        <CompletionModal
-          visible={showCompletion}
-          score={quizScore.score}
-          total={quizScore.total}
-          onClose={handleCloseCompletion}
-        />
-      </View>
-    );
-  }
-
-  return (
-    <SafeAreaView className="flex-1 bg-[#F4F7FC]" edges={['top']}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 8 }}>
-            <TouchableOpacity
-            onPress={handleBackPress}
-            style={{
-                padding: 8,
-                borderRadius: 9999,
-                backgroundColor: 'white',
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.1,
-                shadowRadius: 2,
-            }}
-            >
-            <ArrowLeft size={24} color="#102B50" />
-            </TouchableOpacity>
-
-            <View style={{ flex: 1, marginHorizontal: 16 }}>
-        </View>
-
-        <View style={{ width: 40 }} />
-      </View>
-      <StatusBar style="dark" />
-      
-      {/* Header */}
-      <View 
-        className="bg-white px-6 py-6"
-        style={{
-          shadowColor: '#367CE8',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 2,
-        }}
-      >
-        <View className="flex-row items-center mb-2">
-          <View className="bg-[#367CE8] w-10 h-10 rounded-full items-center justify-center mr-3">
-            <BookOpen size={20} color="white" />
-          </View>
-          <Text className="text-[#102B50] text-2xl font-bold" style={{ fontFamily: 'System' }}>
-            Find your next story
-          </Text>
-        </View>
-        <Text className="text-[#62738A] text-base ml-[52px]">
-          A little reading. A whole new world of words.
-        </Text>
-      </View>
-
-      {/* Story Grid */}
-      <View style={{ flex: 1 }}>
-        <ScrollView
-          contentContainerStyle={{ paddingVertical: 24, paddingBottom: 40 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {stories.map((story) => (
-            <StoryCard
-              key={story.id}
-              story={story}
-              onPress={() => handleStorySelect(story)}
-            />
-          ))}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
-  );
+  if (mode === 'reader' && selected) return <StoryReader story={selected} onClose={close} onComplete={() => setMode('quiz')} />;
+  if (mode === 'quiz' && selected) return <View style={{ flex: 1 }}><QuizView story={selected} onClose={close} onComplete={complete} /><CompletionModal visible={!!result} score={result?.score ?? 0} total={result?.total ?? 0} replay={result?.replay} onClose={close} /></View>;
+  return <SafeAreaView style={ui.screen}><ScrollView contentContainerStyle={ui.content}>
+    <Action secondary label="Back to home" onPress={() => router.back()} />
+    <Text accessibilityRole="header" style={ui.heading}>Find your next story</Text><Text style={ui.body}>Read, reflect, and practice. Completed stories stay marked when you return.</Text>
+    <Text style={ui.muted}>Earn 10 XP the first time you finish a story quiz. Replays are for practice.</Text>
+    {stories.length === 0 && <View style={ui.card}><Text style={ui.title}>New stories are on the way</Text><Text style={ui.body}>Try an everyday English lesson while we prepare more reading.</Text><Action label="Explore lessons" onPress={() => router.push('/esl')} /></View>}
+    {stories.map(story => <StoryCard key={story.id} story={{ ...story, progress: progress.completions[`reading:${story.id}`] ? 100 : 0 }} onPress={() => { replay.current = !!progress.completions[`reading:${story.id}`]; setSelected(story); setMode('reader'); }} />)}
+  </ScrollView></SafeAreaView>;
 }

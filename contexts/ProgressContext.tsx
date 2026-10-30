@@ -1,192 +1,71 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-interface UserProgress {
-  totalMinutesSpoken: number;
-  currentLevel: number;
-  experiencePoints: number;
-  sessionsCompleted: number;
-  averageScore: number;
-  scoreCount: number;
-  streak: number;
-  lastSessionDate: string | null;
-  achievements: string[];
-}
+import { recordPracticeDay } from '../lib/streak';
+import { recordUnitAnswer, saveWritingDraft, toggleReviewCheck, completeUnitActivity } from '../lib/journeyState';
+import { UnitStep } from '../content/learningUnit';
+import React, { createContext, useContext, useCallback } from 'react';
+import { useLocalStore } from '../hooks/useLocalStore';
+import { defaultProgress, decodeProgress, UserProgress, calculateLevel, levelRequirement, completeActivity, withScore } from '../lib/learningState';
 
 interface ProgressContextType {
   progress: UserProgress;
+  loaded: boolean;
+  saving: boolean;
+  dirty: boolean;
+  error: 'load' | 'save' | null;
+  retry: () => Promise<void>;
+  flush: () => Promise<void>;
   addSpeakingTime: (minutes: number) => void;
   addExperience: (points: number) => void;
   updateScore: (score: number) => void;
+  completeLesson: (id: string, score: number, total: number, xp: number) => Promise<void>;
+  saveDraft: (id: string, text: string) => Promise<void>;
+  answerUnitQuestion: (index: number, answer: number, unitId?: string, practice?: boolean) => Promise<void>;
+  checkUnitReview: (index: number, unitId?: string) => Promise<void>;
+  finishUnitStep: (step: UnitStep, unitId?: string) => Promise<void>;
+  finishWritingPractice: () => Promise<void>;
   getLevelProgress: () => { currentLevel: number; progress: number; minutesForNext: number };
   resetProgress: () => void;
 }
-
-const defaultProgress: UserProgress = {
-  totalMinutesSpoken: 0,
-  currentLevel: 1,
-  experiencePoints: 0,
-  sessionsCompleted: 0,
-  averageScore: 0,
-  scoreCount: 0,
-  streak: 0,
-  lastSessionDate: null,
-  achievements: []
-};
-
 const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
-
-// Level system: Each level requires more minutes
-const getLevelRequirements = (level: number): number => {
-  // Level 1: 0-10 minutes, Level 2: 10-25 minutes, Level 3: 25-50 minutes, etc.
-  return Math.floor(10 * Math.pow(1.5, level - 1));
-};
-
-const calculateLevel = (totalMinutes: number): number => {
-  let level = 1;
-  let requiredMinutes = 0;
-  
-  while (totalMinutes >= requiredMinutes + getLevelRequirements(level)) {
-    requiredMinutes += getLevelRequirements(level);
-    level++;
-  }
-  
-  return level;
-};
-
-const calculateExperienceFromMinutes = (minutes: number): number => {
-  return Math.floor(minutes * 10); // 10 XP per minute
-};
-
 export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [progress, setProgress] = useState<UserProgress>(defaultProgress);
-
-  // Load progress from storage on app start
-  useEffect(() => {
-    loadProgress();
-  }, []);
-
-  // Save progress whenever it changes
-  useEffect(() => {
-    saveProgress();
-  }, [progress]);
-
-  const loadProgress = async () => {
-    try {
-      const savedProgress = await AsyncStorage.getItem('userProgress');
-      if (savedProgress) {
-        setProgress(JSON.parse(savedProgress));
-      }
-    } catch (error) {
-      console.error('Error loading progress:', error);
-    }
-  };
-
-  const saveProgress = async () => {
-    try {
-      await AsyncStorage.setItem('userProgress', JSON.stringify(progress));
-    } catch (error) {
-      console.error('Error saving progress:', error);
-    }
-  };
-
+  const { data: progress, update, ...storage } = useLocalStore('userProgress', defaultProgress, decodeProgress);
+  const completeLesson = useCallback((id: string, score: number, total: number, xp: number) =>
+    update(current => completeActivity(current, id, score, total, xp, new Date().toISOString())), [update]);
+  const saveDraft = useCallback((id: string, text: string) => update(current => saveWritingDraft(current, id, text, new Date().toISOString())), [update]);
+  const answerUnitQuestion = useCallback((index: number, answer: number, unitId?: string, practice?: boolean) => update(current => recordUnitAnswer(current, index, answer, unitId, practice)), [update]);
+  const checkUnitReview = useCallback((index: number, unitId?: string) => update(current => toggleReviewCheck(current, index, unitId)), [update]);
+  const finishUnitStep = useCallback((step: UnitStep, unitId?: string) => update(current => completeUnitActivity(current, step, new Date().toISOString(), unitId)), [update]);
+  const finishWritingPractice = useCallback(() => update(current => recordPracticeDay(current, new Date().toISOString())), [update]);
   const addSpeakingTime = (minutes: number) => {
-    setProgress(prev => {
-      const newTotalMinutes = prev.totalMinutesSpoken + minutes;
-      const newLevel = calculateLevel(newTotalMinutes);
-      const newExperience = prev.experiencePoints + calculateExperienceFromMinutes(minutes);
-      
-      // Check for level up achievements
-      const newAchievements = [...prev.achievements];
-      if (newLevel > prev.currentLevel && !newAchievements.includes(`level_${newLevel}`)) {
-        newAchievements.push(`level_${newLevel}`);
-      }
-      
-      // Check for time-based achievements
-      if (newTotalMinutes >= 10 && !newAchievements.includes('10_minutes')) {
-        newAchievements.push('10_minutes');
-      }
-      if (newTotalMinutes >= 60 && !newAchievements.includes('1_hour')) {
-        newAchievements.push('1_hour');
-      }
-      if (newTotalMinutes >= 300 && !newAchievements.includes('5_hours')) {
-        newAchievements.push('5_hours');
-      }
-
-      return {
-        ...prev,
-        totalMinutesSpoken: newTotalMinutes,
-        currentLevel: newLevel,
-        experiencePoints: newExperience,
-        sessionsCompleted: prev.sessionsCompleted + 1,
-        achievements: newAchievements,
-        lastSessionDate: new Date().toISOString()
-      };
-    });
+    if (!Number.isFinite(minutes) || minutes <= 0) return;
+    void update(current => {
+      const total = current.totalMinutesSpoken + minutes;
+      const level = calculateLevel(total);
+      const achievements = new Set(current.achievements);
+      if (level > current.currentLevel) achievements.add(`level_${level}`);
+      if (total >= 10) achievements.add('10_minutes');
+      if (total >= 60) achievements.add('1_hour');
+      if (total >= 300) achievements.add('5_hours');
+      return { ...recordPracticeDay(current, new Date().toISOString()), totalMinutesSpoken: total, currentLevel: level,
+        experiencePoints: current.experiencePoints + Math.floor(minutes * 10),
+        sessionsCompleted: current.sessionsCompleted + 1, lastSessionDate: new Date().toISOString(), achievements: [...achievements] };
+    }).catch(() => {});
   };
-
   const addExperience = (points: number) => {
-    setProgress(prev => ({
-      ...prev,
-      experiencePoints: prev.experiencePoints + points
-    }));
+    if (Number.isFinite(points) && points > 0) void update(current => ({ ...current, experiencePoints: current.experiencePoints + Math.floor(points) })).catch(() => {});
   };
-
-  const updateScore = (percentage: number) => {
-    setProgress(prev => ({
-      ...prev,
-      scoreCount: prev.scoreCount + 1,
-      averageScore: Math.round(
-        (prev.averageScore * prev.scoreCount + percentage) /
-        (prev.scoreCount + 1)
-      ),
-    }));
-    
-  };
-
+  const updateScore = (score: number) => { void update(current => withScore(current, score)).catch(() => {}); };
   const getLevelProgress = () => {
-    const currentLevel = progress.currentLevel;
-    const totalMinutes = progress.totalMinutesSpoken;
-    
-    // Calculate minutes needed for current level
-    let minutesForCurrentLevel = 0;
-    for (let i = 1; i < currentLevel; i++) {
-      minutesForCurrentLevel += getLevelRequirements(i);
-    }
-    
-    const minutesInCurrentLevel = totalMinutes - minutesForCurrentLevel;
-    const minutesNeededForNextLevel = getLevelRequirements(currentLevel);
-    const progressPercentage = Math.min((minutesInCurrentLevel / minutesNeededForNextLevel) * 100, 100);
-    
-    return {
-      currentLevel,
-      progress: Math.round(progressPercentage),
-      minutesForNext: minutesNeededForNextLevel - minutesInCurrentLevel
-    };
+    let used = 0;
+    for (let i = 1; i < progress.currentLevel; i++) used += levelRequirement(i);
+    const needed = levelRequirement(progress.currentLevel);
+    const minutes = progress.totalMinutesSpoken - used;
+    return { currentLevel: progress.currentLevel, progress: Math.max(0, Math.min(100, Math.round(minutes / needed * 100))), minutesForNext: Math.max(0, needed - minutes) };
   };
-
-  const resetProgress = () => {
-    setProgress(defaultProgress);
-  };
-
-  return (
-    <ProgressContext.Provider value={{
-      progress,
-      addSpeakingTime,
-      addExperience,
-      updateScore,
-      getLevelProgress,
-      resetProgress
-    }}>
-      {children}
-    </ProgressContext.Provider>
-  );
+  const resetProgress = () => { void update(() => ({ ...defaultProgress })).catch(() => {}); };
+  return <ProgressContext.Provider value={{ progress, ...storage, completeLesson, saveDraft, answerUnitQuestion, checkUnitReview, finishUnitStep, finishWritingPractice, addSpeakingTime, addExperience, updateScore, getLevelProgress, resetProgress }}>{children}</ProgressContext.Provider>;
 };
-
-export const useProgress = () => {
+export function useProgress() {
   const context = useContext(ProgressContext);
-  if (context === undefined) {
-    throw new Error('useProgress must be used within a ProgressProvider');
-  }
+  if (!context) throw new Error('useProgress must be used within a ProgressProvider');
   return context;
-};
+}

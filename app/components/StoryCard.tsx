@@ -17,17 +17,19 @@ export function StoryCard({ story, onPress }: StoryCardProps) {
 
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${story.title}, ${story.difficulty}${story.progress === 100 ? ", completed" : ""}`}
       onPress={onPress}
       className="bg-white rounded-3xl p-6 mb-4 mx-4 active:scale-[0.98]"
       style={{
-        shadowColor: '#367CE8',
+        shadowColor: '#2463C4',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.04,
         shadowRadius: 8,
         elevation: 3,
       }}
     >
-      <View className="flex-row justify-between items-start mb-3">
+      <View className="flex-row flex-wrap justify-between items-start mb-3">
         <View className="flex-1 mr-3">
           <Text className="text-[#102B50] text-xl font-bold mb-2" style={{ fontFamily: 'System' }}>
             {story.title}
@@ -50,12 +52,12 @@ export function StoryCard({ story, onPress }: StoryCardProps) {
       {story.progress > 0 && (
         <View className="mt-2">
           <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-[#62738A] text-xs">Progress</Text>
-            <Text className="text-[#367CE8] text-xs font-semibold">{story.progress}%</Text>
+            <Text className="text-[#62738A] text-xs">{story.progress === 100 ? "Completed — practice again anytime" : "Progress"}</Text>
+            <Text className="text-[#2463C4] text-xs font-semibold">{story.progress}%</Text>
           </View>
           <View className="h-2 bg-[#E7EFFD] rounded-full overflow-hidden">
             <View 
-              className="h-full bg-[#367CE8] rounded-full"
+              className="h-full bg-[#2463C4] rounded-full"
               style={{ width: `${story.progress}%` }}
             />
           </View>
@@ -64,8 +66,8 @@ export function StoryCard({ story, onPress }: StoryCardProps) {
 
       {story.progress === 0 && (
         <View className="flex-row items-center">
-          <BookOpen size={16} color="#367CE8" />
-          <Text className="text-[#367CE8] text-sm ml-2 font-medium">
+          <BookOpen size={16} color="#2463C4" />
+          <Text className="text-[#2463C4] text-sm ml-2 font-medium">
             Start Reading
           </Text>
         </View>

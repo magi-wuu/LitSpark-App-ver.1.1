@@ -26,9 +26,9 @@ Ask a project lead for review. Resolve feedback and failing checks before merge.
 
 ## Validation
 
-Run `npm run typecheck`. Manually exercise the affected flow, including empty/error states and a narrow screen. For storage changes, close/reopen the app and verify saved state. For scoring/reward changes, test retries and repeated completion to detect duplicate awards. Add focused automated tests for meaningful behavior changes.
+Run `npm run typecheck` and `npm run test:reliability`. Manually exercise the affected flow, including empty/error states and a narrow screen. For storage changes, close/reopen the app and verify saved state. For scoring/reward changes, test retries and repeated completion to detect duplicate awards. Add focused automated tests for meaningful behavior changes.
 
-Jest is configured, but there is no established application test suite yet and the renderer version needs alignment. `npm test` starts watch mode; do not treat an empty suite as evidence of correctness. The initial CI gate runs typechecking. Lint configuration and stronger test gates are backlog work.
+Jest is configured, but React component tests are not established yet and the renderer version needs alignment. `npm test` starts watch mode; do not treat an empty suite as evidence of correctness. CI runs typechecking and the independent Node-based reliability suite. Lint configuration and stronger test gates are backlog work.
 
 ## Definition of done
 

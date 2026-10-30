@@ -70,12 +70,12 @@ export function StoryReader({ story, onClose, onComplete }: StoryReaderProps) {
   const paragraphs = story.content ? story.content.split('\n\n').filter(p => p.trim()) : [];
 
   return (
-    <SafeAreaView className="flex-1 bg-[#FAF8F3]" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-[#F4F7FC]" edges={['top']}>
       {/* Header */}
       <View 
         className="bg-white px-4 py-4 flex-row justify-between items-center"
         style={{
-          shadowColor: '#A8D8EA',
+          shadowColor: '#2463C4',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
           shadowRadius: 4,
@@ -83,22 +83,22 @@ export function StoryReader({ story, onClose, onComplete }: StoryReaderProps) {
         }}
       >
         <View className="flex-1 mr-4">
-          <Text className="text-[#3A3A3A] text-2xl font-bold" style={{ fontFamily: 'System' }}>
+          <Text className="text-[#102B50] text-2xl font-bold" style={{ fontFamily: 'System' }}>
             {story.title}
           </Text>
-          <Text className="text-[#7A7A7A] text-sm mt-1">
+          <Text className="text-[#62738A] text-sm mt-1">
             {story.difficulty} • {story.readingTime} min read
           </Text>
         </View>
-        <Pressable onPress={onClose} className="p-2">
-          <X size={24} color="#3A3A3A" />
+        <Pressable accessibilityRole="button" accessibilityLabel="Back to stories" onPress={onClose} style={{ minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center' }}>
+          <X size={24} color="#102B50" />
         </Pressable>
       </View>
 
       {/* Progress Bar */}
-      <View className="h-1 bg-[#FAF8F3]">
+      <View className="h-1 bg-[#F4F7FC]">
         <View 
-          className="h-full bg-[#A8D8EA]"
+          className="h-full bg-[#2463C4]"
           style={{ width: `${scrollProgress}%` }}
         />
       </View>
@@ -106,7 +106,7 @@ export function StoryReader({ story, onClose, onComplete }: StoryReaderProps) {
       {/* Content */}
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ padding: 24, paddingBottom: 120, flexGrow: 1 }}
+        contentContainerStyle={{ padding: 24, paddingBottom: 24, flexGrow: 1 }}
         onScroll={handleScroll}
         scrollEventThrottle={16}
         onContentSizeChange={handleContentSizeChange}
@@ -116,27 +116,28 @@ export function StoryReader({ story, onClose, onComplete }: StoryReaderProps) {
           paragraphs.map((paragraph, index) => (
             <Text 
               key={index}
-              className="text-[#3A3A3A] text-lg leading-8 mb-6"
+              className="text-[#102B50] text-lg leading-8 mb-6"
               style={{ fontFamily: 'System' }}
             >
               {paragraph}
             </Text>
           ))
         ) : (
-          <Text className="text-[#7A7A7A] text-lg">Loading story content...</Text>
+          <Text className="text-[#62738A] text-lg">This story has no text yet. Return to the library and choose another story.</Text>
         )}
       </ScrollView>
 
       {/* Complete Button */}
-      {showCompleteButton && (
+      {showCompleteButton && paragraphs.length > 0 && (
         <View
-          className="absolute bottom-8 left-4 right-4"
+          style={{ padding: 16 }}
         >
           <Pressable
+            accessibilityRole="button"
             onPress={onComplete}
-            className="bg-[#A8D8EA] rounded-full py-4 px-8 active:scale-95"
+            className="bg-[#2463C4] rounded-full py-4 px-8 active:scale-95"
             style={{
-              shadowColor: '#A8D8EA',
+              shadowColor: '#2463C4',
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
               shadowRadius: 8,

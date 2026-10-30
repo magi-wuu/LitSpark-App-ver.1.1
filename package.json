@@ -11,7 +11,8 @@
     "test": "jest --watchAll",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "setup": "node scripts/setup.cjs"
+    "setup": "node scripts/setup.cjs",
+    "test:reliability": "node scripts/test-reliability.cjs"
   },
   "jest": {
     "preset": "jest-expo"

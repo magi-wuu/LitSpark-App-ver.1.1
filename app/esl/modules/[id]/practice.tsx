@@ -1,110 +1,57 @@
-import { View, Text, Pressable, SafeAreaView, Alert } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { modules } from '../../..//data/modules';
-import { useState } from 'react';
-import ProgressBar from '../../../components/ProgressBar';
+import { modules } from '../../../data/modules';
 import QuestionCard from '../../../components/QuestionCard';
 import FeedbackPanel from '../../../components/FeedbackPanel';
-import { ArrowLeft } from 'lucide-react-native';
-import { useProgress } from "@/contexts/ProgressContext";
-
+import { useProgress } from '../../../../contexts/ProgressContext';
+import { Action, StateScreen, ui } from '../../../../components/LearningUI';
 export default function PracticeScreen() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const module = modules.find((m) => m.id === id);
-    const { updateScore } = useProgress();
-
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const module = modules.find(item => item.id === id);
+  const { completeLesson, flush, progress } = useProgress();
+  const [index, setIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-
-  if (!module) {
-    return (
-      <SafeAreaView className="flex-1 bg-cream">
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-xl text-charcoal">Module not found</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const currentQuestion = module.questions[currentQuestionIndex];
-  const totalQuestions = module.questions.length;
-
+  const [feedback, setFeedback] = useState(false);
+  const [correct, setCorrect] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const answered = useRef(false);
+  const advancing = useRef(false);
+  useEffect(() => { answered.current = false; advancing.current = false; }, [index]);
+  const question = module?.questions[index];
+  if (!module || !question) return <StateScreen title="This lesson isn’t ready" message="Choose another lesson while we update its practice questions." action="Back to lessons" onAction={() => router.replace('/esl')} />;
   const handleAnswer = (answer: string | number) => {
-    const correct =
-      currentQuestion.type === "sentence-building"
-        ? answer === currentQuestion.correctAnswer
-        : answer === currentQuestion.correctAnswer;
-
-    setIsCorrect(correct);
-    if (correct) {
-      setCorrectCount(correctCount + 1);
+    if (answered.current || advancing.current) return;
+    answered.current = true;
+    const isCorrect = answer === question.correctAnswer;
+    setCorrect(isCorrect);
+    if (isCorrect) setCorrectCount(count => count + 1);
+    setFeedback(true);
+  };
+  const next = async () => {
+    if (!answered.current || advancing.current) return;
+    advancing.current = true;
+    if (index < module.questions.length - 1) {
+      setFeedback(false); setIndex(index + 1);
+      return;
     }
-    setShowFeedback(true);
+    setSaving(true); setError(''); setFeedback(false);
+    try {
+      await completeLesson(`module:${module.id}`, correctCount, module.questions.length, correctCount);
+      await flush();
+      router.replace({ pathname: '/esl/modules/[id]/complete', params: { id: module.id } });
+    } catch {
+      setError('Your result hasn’t saved. Retry here before leaving; the same lesson won’t award XP twice.');
+      advancing.current = false;
+    } finally { setSaving(false); }
   };
-
-  const handleContinue = () => {
-    setShowFeedback(false);
-
-    if (currentQuestionIndex < totalQuestions - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-    } else {
-      // Navigate to completion screen
-      updateScore(Math.round((correctCount / 10) * 100));
-      router.replace({
-        pathname: '/esl/modules/[id]/complete',
-        params: {
-          id: module.id,
-          correctCount: correctCount.toString(),
-          totalQuestions: totalQuestions.toString(),
-        },
-      });
-    }
-  };
-
-  const handleExit = () => {
-    Alert.alert("Exit Practice?", "Your progress will not be saved.", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Exit", style: "destructive", onPress: () => router.push('/esl') },
-    ]);
-  };
-
-  return (
-    <SafeAreaView className="flex-1 bg-cream">
-      <View className="flex-1">
-        {/* Progress Bar */}
-        <ProgressBar
-          current={currentQuestionIndex + 1}
-          total={totalQuestions}
-        />
-
-        {/* Header */}
-        <View className="flex-row items-center justify-between px-5 py-4">
-          <Pressable
-            onPress={() => router.push('/esl')}
-            className="w-10 h-10 items-center justify-center active:scale-90"
-          >
-            <ArrowLeft size={24} color="#1E293B" />
-          </Pressable>
-          <Text className="text-sm font-mono text-gray-medium">
-            {currentQuestionIndex + 1} / {totalQuestions}
-          </Text>
-          <View className="w-10" />
-        </View>
-
-        {/* Question Card */}
-        <QuestionCard question={currentQuestion} onAnswer={handleAnswer} />
-
-        {/* Feedback Panel */}
-        <FeedbackPanel
-          visible={showFeedback}
-          correct={isCorrect}
-          explanation={currentQuestion.explanation}
-          onContinue={handleContinue}
-        />
-      </View>
-    </SafeAreaView>
-  );
+  return <SafeAreaView style={ui.screen}>
+    <View style={{ padding: 16, gap: 10 }}><Action secondary label="Back to lessons" disabled={saving} onPress={() => router.replace('/esl')} /><Text style={ui.muted}>Question {index + 1} of {module.questions.length}{progress.completions[`module:${module.id}`] ? ' · Practice replay (no additional XP)' : ''}</Text></View>
+    <QuestionCard key={`${module.id}:${index}`} question={question} onAnswer={handleAnswer} disabled={feedback || saving || !!error} />
+    <FeedbackPanel visible={feedback} correct={correct} explanation={question.explanation} onContinue={() => { void next(); }} />
+    {(saving || !!error) && <View style={{ padding: 20, gap: 12 }}><Text accessibilityRole={error ? 'alert' : undefined} style={ui.body}>{saving ? 'Saving your result…' : error}</Text>{!!error && <Action label="Retry saving result" onPress={() => { void next(); }} />}</View>}
+  </SafeAreaView>;
 }
